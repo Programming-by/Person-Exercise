@@ -1,4 +1,5 @@
 ﻿  ATM System.cpp
-C:\Users\User\Source\Repos\ATM System\ATM System\ATM System.cpp(61,30): warning C4267: '=': conversion from 'size_t' to 'short', possible loss of data
-C:\Users\User\Source\Repos\ATM System\ATM System\ATM System.cpp(445,26): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
+C:\Users\User\Source\Repos\ATM System\ATM System\ATM System.cpp(46,30): warning C4267: '=': conversion from 'size_t' to 'short', possible loss of data
+C:\Users\User\Source\Repos\ATM System\ATM System\ATM System.cpp(359,9): warning C4244: 'return': conversion from 'double' to 'short', possible loss of data
+C:\Users\User\Source\Repos\ATM System\ATM System\ATM System.cpp(402): warning C4715: 'getQuickWithdrawAmount': not all control paths return a value
   ATM System.vcxproj -> C:\Users\User\Source\Repos\ATM System\x64\Debug\ATM System.exe

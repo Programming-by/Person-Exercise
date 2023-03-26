@@ -17,27 +17,12 @@ enum enATMMenuOption {
 	eLogout = 5
 };
 
-enum enQuickWithdrawOption {
-	/*eOptionOne = 20,
-	eOptionTwo = 50,
-	eOptionThree = 100,
-	eOptionFour = 200,
-	eOptionFive = 400,
-	eOptionSix = 600,
-	eOptionSeven = 800,
-	eOptionEight = 1000*/
-	eOptionOne = 1,
-	eOptionTwo = 2,
-	eOptionThree = 3,
-	eOptionFour = 4,
-	eOptionFive = 5,
-	eOptionSix = 6,
-	eOptionSeven = 7,
-	eOptionEight = 8
-};
 
 const string ClientsFileName = "Clients.txt";
 
+void ShowQuickWithdrawScreen();
+void ShowNormalWithdrawScreen();
+void ShowDepositScreen();
 void ShowATMMainMenu();
 void Login();
 
@@ -50,7 +35,7 @@ struct sClient {
 	bool MarkForDelete = false;
 };
 
-sClient Client;
+sClient CurrentClient;
 
 vector<string> SplitString(string S1, string Delim) {
 	vector<string> vString;
@@ -207,17 +192,21 @@ sClient ReadNewClient() {
 short ReadQuickWithdrawOption() {
 
 	short Choice = 0;
-	cout << "Choose what do you want to do? [1 to 8]? ";
+
+	do {
+
+	cout << "Choose what do you want to do? [1 to 9]? ";
 	cin >> Choice;
 
-	if (Choice == 9) {
-		ShowATMMainMenu();
+
+	} while (Choice < 1 || Choice > 9);
+		
+	return  Choice;
 	}
 
-	return  Choice;
 
 
-}
+
 
 
 short ReadATMMainMenuOption() {
@@ -358,77 +347,101 @@ bool DepositBalaneToClientByAccountNumber(string AccountNumber, double Amount, v
 	return false;
 }
 
+
+short ReadDepositAmount() {
+	double Amount;
+	cout << "\nEnter a positive Deposit Amount? ";
+	cin >> Amount;
+	while (Amount <= 0) {
+		cout << "\nEnter a positive Deposit Amount? ";
+		cin >> Amount;
+	}
+	return Amount;
+}
+
+void PerformDepositOption() {
+	double DepositAmount = ReadDepositAmount();
+
+	vector <sClient> vClients = LoadClientsDataFromFile(ClientsFileName);
+
+
+	DepositBalaneToClientByAccountNumber(CurrentClient.AccountNumber, DepositAmount, vClients);
+	CurrentClient.AccountBalance += DepositAmount;
+
+}
+
 void ShowDepositScreen() {
 	cout << "==========================================\n";
 	cout << "\tDeposit Screen";
 	cout << "\n==========================================\n";
 
-	cout << "\nEnter a positive Deposit Amount? ";
-	double Amount = 0;
+	PerformDepositOption();
+}
 
-	cin >> Amount;
+short getQuickWithdrawAmount(short QuickWithdrawOption) {
+
+	switch (QuickWithdrawOption)
+	{
+	case 1:
+		return 20;
+	case 2:
+		return 50;
+	case 3:
+		return 100;
+	case 4:
+		return 200;
+	case 5:
+		return 400;
+	case 6:
+		return 600;
+	case 7:
+		return 800;
+	case 8:
+		return 1000;
+	}
+}
+
+void PerformenQuickWithdrawOption(short QuickWithdrawOption) {
+
+	if (QuickWithdrawOption == 9) {
+
+		return;
+	}
+
+
+	short WithdrawBalance = getQuickWithdrawAmount(QuickWithdrawOption);
+
+	if (WithdrawBalance > CurrentClient.AccountBalance) {
+
+		cout << "\nThe amount exceeds your balance, make another choice.\n";
+		cout << "Press Anykey to continue...";
+		system("pause>0");
+		ShowQuickWithdrawScreen();
+		return;
+	}
+
 	vector <sClient> vClients = LoadClientsDataFromFile(ClientsFileName);
-
-	
-	DepositBalaneToClientByAccountNumber(Client.AccountNumber, Amount, vClients);
+	DepositBalaneToClientByAccountNumber(CurrentClient.AccountNumber, WithdrawBalance * -1, vClients);
+	CurrentClient.AccountBalance -= WithdrawBalance;
 
 }
 
 
-void PerformenQuickWithdrawOption(enQuickWithdrawOption Amount) {
-
-	vector <sClient> vClients = LoadClientsDataFromFile(ClientsFileName);
-	switch (Amount) {
-
-	case enQuickWithdrawOption::eOptionOne:
-	cout << "D";
-		DepositBalaneToClientByAccountNumber(Client.AccountNumber, 20 * -1, vClients);
-		break;
-	case enQuickWithdrawOption::eOptionTwo:
-		DepositBalaneToClientByAccountNumber(Client.AccountNumber, 50 * -1, vClients);
-
-		break;
-
-	case enQuickWithdrawOption::eOptionThree:
-		DepositBalaneToClientByAccountNumber(Client.AccountNumber, 100 * -1, vClients);
-
-		break;
-
-	case enQuickWithdrawOption::eOptionFour:
-		DepositBalaneToClientByAccountNumber(Client.AccountNumber, 200 * -1, vClients);
-
-		break;
-
-	case enQuickWithdrawOption::eOptionFive:
-		DepositBalaneToClientByAccountNumber(Client.AccountNumber, 400 * -1, vClients);
-
-		break;
-
-	case enQuickWithdrawOption::eOptionSix:
-		DepositBalaneToClientByAccountNumber(Client.AccountNumber, 600 * -1, vClients);
-
-		break;
-
-	case enQuickWithdrawOption::eOptionSeven:
-		DepositBalaneToClientByAccountNumber(Client.AccountNumber, 800 * -1, vClients);
-
-		break;
-
-	case enQuickWithdrawOption::eOptionEight:
-		DepositBalaneToClientByAccountNumber(Client.AccountNumber, 1000 * -1, vClients);
-
-		break;
-
-
+short ReadWithdrawAmount() {
+	int Amount;
+	cout << "\n Enter an amount multiple of 5's ?";
+	cin >> Amount;
+	while (Amount % 5 != 0) {
+		cout << "\n Enter an amount multiple of 5's ?";
+		cin >> Amount;
 	}
 
-
+	return Amount;
 
 }
 
 void ShowQuickWithdrawScreen() {
-	vector <sClient> vClients = LoadClientsDataFromFile(ClientsFileName);
-	int TotalBalances = 0;
+	system("cls");
 	cout << "==========================================\n";
 	cout << "\tQuick Withdraw Screen";
 	cout << "\n==========================================\n";
@@ -439,33 +452,30 @@ void ShowQuickWithdrawScreen() {
 	cout << "\t[7] 800 \t" << "[8] 1000\n";
 	cout << "\t[9] Exit";
 	cout << "\n==========================================\n";
+	cout << "your balance is " << CurrentClient.AccountBalance << endl;
 
-	for (sClient& Client : vClients) {
+	PerformenQuickWithdrawOption(ReadQuickWithdrawOption());
 
-		TotalBalances += Client.AccountBalance;
-		break;
-
-	}
-
-
-	cout << "your balance is " << TotalBalances << endl;
-
-short Amount = ReadQuickWithdrawOption();
-
-  if (Amount > Client.AccountBalance) {
-	  cout << "the amount exceeds your balance,make another choice.";
-	  cout << "\n Press AnyKey to continue...";
-	  system("pause>0");
-	  system("cls");
-	  ShowQuickWithdrawScreen();
-  }
-
-
-	PerformenQuickWithdrawOption((enQuickWithdrawOption) Amount);
 
 }
 
+void PerformNormalWithdrawOption() {
 
+	int WithdrawBalance = ReadWithdrawAmount();
+
+	if (WithdrawBalance > CurrentClient.AccountBalance) {
+		cout << "the amount exceeds your balance,make another choice.";
+		cout << "\n Press AnyKey to continue...";
+		system("pause>0");
+		ShowNormalWithdrawScreen();
+		return;
+	}
+		vector <sClient> vClients = LoadClientsDataFromFile(ClientsFileName);
+	    DepositBalaneToClientByAccountNumber(CurrentClient.AccountNumber, WithdrawBalance * -1, vClients);
+		CurrentClient.AccountBalance -= WithdrawBalance;
+}
+
+	
 
 void ShowNormalWithdrawScreen() {
 
@@ -473,52 +483,17 @@ void ShowNormalWithdrawScreen() {
 	cout << "\tNormal Withdraw Screen";
 	cout << "\n==========================================\n";
 
-	cout << "\n Enter an amount multiple of 5's ?";
-	int Amount = 0;
-	cin >> Amount;
-
-	if (Amount % 5 != 0) {
-		system("cls");
-		ShowNormalWithdrawScreen();
-	}
-
-	vector <sClient> vClients = LoadClientsDataFromFile(ClientsFileName);
-
-   if (Amount > Client.AccountBalance) {
-		cout << "the amount exceeds your balance,make another choice.";
-		cout << "\n Press AnyKey to continue...";	
-		system("pause>0"); 
-		system("cls");
-		ShowNormalWithdrawScreen();
-	}
-
-	DepositBalaneToClientByAccountNumber(Client.AccountNumber, Amount * -1, vClients);
+	PerformNormalWithdrawOption();
 }
 
 
-void ShowTotalBalances() {
 
-	vector <sClient> vClients = LoadClientsDataFromFile(ClientsFileName);
-	double TotalBalances = 0;
 
+void ShowCheckBalanceScreen() {
 	cout << "==========================================\n";
 	cout << "\t\tCheck Balance Screen\n";
 	cout << "==========================================\n";
-
-		for (sClient& Client : vClients) {
-
-			TotalBalances += Client.AccountBalance;
-			break;
-
-		}
-
-		cout << "Your Balance is: " << TotalBalances;
-}
-
-void ShowTotalBalancesScreen() {
-
-	ShowTotalBalances();
-
+	cout << "Your Balance is: " << CurrentClient.AccountBalance;
 }
 
 
@@ -545,7 +520,7 @@ void PerformATMMainMenuOptions(enATMMenuOption ATMMainMenuOption) {
 		break;
 	case enATMMenuOption::eTotalBalances:
 		system("cls");
-		ShowTotalBalancesScreen();
+		ShowCheckBalanceScreen();
 		GoBackToMainMenu();
 
 		break;
@@ -579,7 +554,7 @@ void ShowATMMainMenu() {
 bool LoadClientInfo(string AccountNumber, string PinCode) {
 
 
-	if (FindClientByAccountNumberAndPassword(AccountNumber, PinCode, Client)) {
+	if (FindClientByAccountNumberAndPassword(AccountNumber, PinCode, CurrentClient)) {
 		return true;
 	}
 	return false;
